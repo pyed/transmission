@@ -16,7 +16,7 @@ type ApiClient struct {
 
 func NewClient(url string,
 	username string, password string) ApiClient {
-	ac := ApiClient{url: url + "/transmission/rpc", username: username, password: password}
+	ac := ApiClient{url: url + "/rpc", username: username, password: password}
 
 	return ac
 }
