@@ -16,7 +16,7 @@ type ApiClient struct {
 
 func NewClient(url string,
 	username string, password string) ApiClient {
-	ac := ApiClient{url: url + "/rpc", username: username, password: password}
+	ac := ApiClient{url: url + "/transmission/rpc", username: username, password: password}
 
 	return ac
 }
@@ -34,6 +34,7 @@ func (ac *ApiClient) Post(body string) ([]byte, error) {
 	if err != nil {
 		return make([]byte, 0), err
 	}
+	defer res.Body.Close()
 	if res.StatusCode == 409 {
 		ac.getToken()
 		authRequest, err := ac.authRequest("POST", body)
@@ -63,6 +64,7 @@ func (ac *ApiClient) getToken() error {
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 	ac.token = res.Header.Get("X-Transmission-Session-Id")
 	return nil
 }
