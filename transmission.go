@@ -6,8 +6,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"sort"
-
-	"github.com/kr/pretty"
 )
 
 //TransmissionClient to talk to transmission
@@ -95,7 +93,7 @@ type Torrent struct {
 }
 
 // Torrents represent []Torrent
-type Torrents []Torrent
+type Torrents []*Torrent
 
 // sorting types
 type (
@@ -168,19 +166,19 @@ func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 }
 
 // GetTorrent takes an id and returns *Torrent
-func (ac *TransmissionClient) GetTorrent(id int) (Torrent, error) {
+func (ac *TransmissionClient) GetTorrent(id int) (*Torrent, error) {
 	cmd := NewGetTorrentsCmd()
 	cmd.Arguments.Ids = append(cmd.Arguments.Ids, id)
 
 	out, err := ac.ExecuteCommand(cmd)
 	if err != nil {
-		return Torrent{}, err
+		return &Torrent{}, err
 	}
 
 	if len(out.Arguments.Torrents) > 0 {
 		return out.Arguments.Torrents[0], nil
 	}
-	return Torrent{}, errors.New("No torrent with that id")
+	return &Torrent{}, errors.New("No torrent with that id")
 }
 
 // GetStats returns "session-stats"
@@ -287,7 +285,6 @@ func (ac *TransmissionClient) ExecuteCommand(cmd *Command) (*Command, error) {
 	if err != nil {
 		return out, err
 	}
-	pretty.Print(string(output))
 	err = json.Unmarshal(output, &out)
 	if err != nil {
 		return out, err
