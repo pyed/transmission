@@ -3,6 +3,7 @@ package transmission
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"sort"
 
@@ -156,7 +157,7 @@ func New(url string, username string, password string) TransmissionClient {
 
 //GetTorrents get a list of torrents
 func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
-	cmd, err := NewGetTorrentsCmd()
+	cmd := NewGetTorrentsCmd()
 
 	out, err := ac.ExecuteCommand(cmd)
 	if err != nil {
@@ -164,6 +165,22 @@ func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 	}
 
 	return out.Arguments.Torrents, nil
+}
+
+// GetTorrent takes an id and returns *Torrent
+func (ac *TransmissionClient) GetTorrent(id int) (Torrent, error) {
+	cmd := NewGetTorrentsCmd()
+	cmd.Arguments.Ids = append(cmd.Arguments.Ids, id)
+
+	out, err := ac.ExecuteCommand(cmd)
+	if err != nil {
+		return Torrent{}, err
+	}
+
+	if len(out.Arguments.Torrents) > 0 {
+		return out.Arguments.Torrents[0], nil
+	}
+	return Torrent{}, errors.New("No torrent with that id")
 }
 
 // GetStats returns "session-stats"
@@ -198,7 +215,7 @@ func (ac *TransmissionClient) StopTorrent(id int) (string, error) {
 	return ac.sendSimpleCommand("torrent-stop", id)
 }
 
-func NewGetTorrentsCmd() (*Command, error) {
+func NewGetTorrentsCmd() *Command {
 	cmd := &Command{}
 
 	cmd.Method = "torrent-get"
@@ -207,7 +224,7 @@ func NewGetTorrentsCmd() (*Command, error) {
 		"rateDownload", "rateUpload", "downloadDir", "isFinished", "downloadedEver",
 		"percentDone", "seedRatioMode", "error", "errorString", "trackers"}
 
-	return cmd, nil
+	return cmd
 }
 
 func NewAddCmd() (*Command, error) {
