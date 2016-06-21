@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"sort"
+
+	"github.com/kr/pretty"
 )
 
 //TransmissionClient to talk to transmission
@@ -27,6 +29,14 @@ type arguments struct {
 	MetaInfo     string       `json:"metainfo,omitempty"`
 	Filename     string       `json:"filename,omitempty"`
 	TorrentAdded TorrentAdded `json:"torrent-added"`
+	// Stats
+	ActiveTorrentCount int             `json:"activeTorrentCount"`
+	CumulativeStats    cumulativeStats `json:"cumulative-stats"`
+	CurrentStats       currentStats    `json:"current-stats"`
+	DownloadSpeed      int             `json:"downloadSpeed"`
+	PausedTorrentCount int             `json:"pausedTorrentCount"`
+	TorrentCount       int             `json:"torrentCount"`
+	UploadSpeed        int             `json:"uploadSpeed"`
 }
 
 type tracker struct {
@@ -34,6 +44,31 @@ type tracker struct {
 	Id       int    `json:"id"`
 	Scrape   string `json:"scrape"`
 	Tire     int    `json:"tire"`
+}
+
+// session-stats
+type Stats struct {
+	ActiveTorrentCount int
+	CumulativeStats    cumulativeStats
+	CurrentStats       currentStats
+	DownloadSpeed      int
+	PausedTorrentCount int
+	TorrentCount       int
+	UploadSpeed        int
+}
+type cumulativeStats struct {
+	DownloadedBytes int `json:"downloadedBytes"`
+	FilesAdded      int `json:"filesAdded"`
+	SecondsActive   int `json:"secondsActive"`
+	SessionCount    int `json:"sessionCount"`
+	UploadedBytes   int `json:"uploadedBytes"`
+}
+type currentStats struct {
+	DownloadedBytes int `json:"downloadedBytes"`
+	FilesAdded      int `json:"filesAdded"`
+	SecondsActive   int `json:"secondsActive"`
+	SessionCount    int `json:"sessionCount"`
+	UploadedBytes   int `json:"uploadedBytes"`
 }
 
 //Torrent struct for torrents
@@ -131,6 +166,28 @@ func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 	return out.Arguments.Torrents, nil
 }
 
+// GetStats returns "session-stats"
+func (ac *TransmissionClient) GetStats() (*Stats, error) {
+	cmd := &Command{
+		Method: "session-stats",
+	}
+
+	out, err := ac.ExecuteCommand(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Stats{
+		ActiveTorrentCount: out.Arguments.ActiveTorrentCount,
+		CumulativeStats:    out.Arguments.CumulativeStats,
+		CurrentStats:       out.Arguments.CurrentStats,
+		DownloadSpeed:      out.Arguments.DownloadSpeed,
+		PausedTorrentCount: out.Arguments.PausedTorrentCount,
+		TorrentCount:       out.Arguments.TorrentCount,
+		UploadSpeed:        out.Arguments.UploadSpeed,
+	}, nil
+}
+
 //StartTorrent start the torrent
 func (ac *TransmissionClient) StartTorrent(id int) (string, error) {
 	return ac.sendSimpleCommand("torrent-start", id)
@@ -213,6 +270,7 @@ func (ac *TransmissionClient) ExecuteCommand(cmd *Command) (*Command, error) {
 	if err != nil {
 		return out, err
 	}
+	pretty.Print(string(output))
 	err = json.Unmarshal(output, &out)
 	if err != nil {
 		return out, err
