@@ -8,6 +8,16 @@ import (
 	"sort"
 )
 
+const (
+	StatusStopped = iota
+	StatusCheckPending
+	StatusChecking
+	StatusDownloadPending
+	StatusDownloading
+	StatusSeedPending
+	StatusSeeding
+)
+
 //TransmissionClient to talk to transmission
 type TransmissionClient struct {
 	apiclient ApiClient
@@ -90,6 +100,28 @@ type Torrent struct {
 	Trackers       []tracker `json:"trackers"`
 	Error          int       `json:"error"`
 	ErrorString    string    `json:"errorString"`
+}
+
+// Status translates the status of the torrent
+func (t *Torrent) TorrentStatus() string {
+	switch t.Status {
+	case StatusStopped:
+		return "Stopped"
+	case StatusCheckPending:
+		return "Check waiting"
+	case StatusChecking:
+		return "Checking"
+	case StatusDownloadPending:
+		return "Download waiting"
+	case StatusDownloading:
+		return "Downloading"
+	case StatusSeedPending:
+		return "Seed waiting"
+	case StatusSeeding:
+		return "Seeding"
+	default:
+		return "unknown"
+	}
 }
 
 // Torrents represent []Torrent
