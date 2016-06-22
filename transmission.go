@@ -85,15 +85,16 @@ type Torrent struct {
 	ID             int       `json:"id"`
 	Name           string    `json:"name"`
 	Status         int       `json:"status"`
-	AddedDate      int       `json:"addedDate"`
-	LeftUntilDone  int       `json:"leftUntilDone"`
+	AddedDate      int64     `json:"addedDate"`
+	LeftUntilDone  uint64    `json:"leftUntilDone"`
+	SizeWhenDone   uint64    `json:"sizeWhenDone"`
 	Eta            int       `json:"eta"`
 	UploadRatio    float64   `json:"uploadRatio"`
-	RateDownload   int       `json:"rateDownload"`
-	RateUpload     int       `json:"rateUpload"`
+	RateDownload   uint64    `json:"rateDownload"`
+	RateUpload     uint64    `json:"rateUpload"`
 	DownloadDir    string    `json:"downloadDir"`
-	DownloadedEver int       `json:"downloadedEver"`
-	UploadedEver   int       `json:"uploadedEver"`
+	DownloadedEver uint64    `json:"downloadedEver"`
+	UploadedEver   uint64    `json:"uploadedEver"`
 	IsFinished     bool      `json:"isFinished"`
 	PercentDone    float64   `json:"percentDone"`
 	SeedRatioMode  int       `json:"seedRatioMode"`
@@ -250,7 +251,7 @@ func NewGetTorrentsCmd() *Command {
 
 	cmd.Method = "torrent-get"
 	cmd.Arguments.Fields = []string{"id", "name",
-		"status", "addedDate", "leftUntilDone", "eta", "uploadRatio", "uploadedEver",
+		"status", "addedDate", "leftUntilDone", "sizeWhenDone", "eta", "uploadRatio", "uploadedEver",
 		"rateDownload", "rateUpload", "downloadDir", "isFinished", "downloadedEver",
 		"percentDone", "seedRatioMode", "error", "errorString", "trackers"}
 
