@@ -42,10 +42,10 @@ type arguments struct {
 	ActiveTorrentCount int             `json:"activeTorrentCount"`
 	CumulativeStats    cumulativeStats `json:"cumulative-stats"`
 	CurrentStats       currentStats    `json:"current-stats"`
-	DownloadSpeed      int             `json:"downloadSpeed"`
+	DownloadSpeed      uint64          `json:"downloadSpeed"`
 	PausedTorrentCount int             `json:"pausedTorrentCount"`
 	TorrentCount       int             `json:"torrentCount"`
-	UploadSpeed        int             `json:"uploadSpeed"`
+	UploadSpeed        uint64          `json:"uploadSpeed"`
 }
 
 type tracker struct {
@@ -60,24 +60,24 @@ type Stats struct {
 	ActiveTorrentCount int
 	CumulativeStats    cumulativeStats
 	CurrentStats       currentStats
-	DownloadSpeed      int
+	DownloadSpeed      uint64
 	PausedTorrentCount int
 	TorrentCount       int
-	UploadSpeed        int
+	UploadSpeed        uint64
 }
 type cumulativeStats struct {
-	DownloadedBytes int `json:"downloadedBytes"`
-	FilesAdded      int `json:"filesAdded"`
-	SecondsActive   int `json:"secondsActive"`
-	SessionCount    int `json:"sessionCount"`
-	UploadedBytes   int `json:"uploadedBytes"`
+	DownloadedBytes uint64 `json:"downloadedBytes"`
+	FilesAdded      int    `json:"filesAdded"`
+	SecondsActive   int    `json:"secondsActive"`
+	SessionCount    int    `json:"sessionCount"`
+	UploadedBytes   uint64 `json:"uploadedBytes"`
 }
 type currentStats struct {
-	DownloadedBytes int `json:"downloadedBytes"`
-	FilesAdded      int `json:"filesAdded"`
-	SecondsActive   int `json:"secondsActive"`
-	SessionCount    int `json:"sessionCount"`
-	UploadedBytes   int `json:"uploadedBytes"`
+	DownloadedBytes uint64 `json:"downloadedBytes"`
+	FilesAdded      int    `json:"filesAdded"`
+	SecondsActive   int    `json:"secondsActive"`
+	SessionCount    int    `json:"sessionCount"`
+	UploadedBytes   uint64 `json:"uploadedBytes"`
 }
 
 //Torrent struct for torrents
