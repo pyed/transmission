@@ -276,32 +276,27 @@ func NewGetTorrentsCmd() *Command {
 	return cmd
 }
 
-func NewAddCmd() (*Command, error) {
+func NewAddCmd() *Command {
 	cmd := &Command{}
 	cmd.Method = "torrent-add"
-	return cmd, nil
+	return cmd
 }
 
-func NewAddCmdByMagnet(magnetLink string) (*Command, error) {
-	cmd, _ := NewAddCmd()
-	cmd.Arguments.Filename = magnetLink
-	return cmd, nil
-}
-
-func NewAddCmdByURL(url string) (*Command, error) {
-	cmd, _ := NewAddCmd()
+// URL or magnet
+func NewAddCmdByURL(url string) *Command {
+	cmd := NewAddCmd()
 	cmd.Arguments.Filename = url
-	return cmd, nil
+	return cmd
 }
 
-func NewAddCmdByFilename(filename string) (*Command, error) {
-	cmd, _ := NewAddCmd()
+func NewAddCmdByFilename(filename string) *Command {
+	cmd := NewAddCmd()
 	cmd.Arguments.Filename = filename
-	return cmd, nil
+	return cmd
 }
 
 func NewAddCmdByFile(file string) (*Command, error) {
-	cmd, _ := NewAddCmd()
+	cmd := NewAddCmd()
 
 	fileData, err := ioutil.ReadFile(file)
 	if err != nil {
