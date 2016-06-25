@@ -214,6 +214,24 @@ func (ac *TransmissionClient) GetTorrent(id int) (*Torrent, error) {
 	return &Torrent{}, errors.New("No torrent with that id")
 }
 
+// Delete takes a bool, if true it will delete with data;
+// returns the name of the deleted torrent if it succeed
+func (ac *TransmissionClient) DeleteTorrent(id int, wd bool) (string, error) {
+	torrent, err := ac.GetTorrent(id)
+	if err != nil {
+		return "", err
+	}
+
+	cmd := newDelCmd(id, wd)
+
+	_, err = ac.ExecuteCommand(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return torrent.Name, nil
+}
+
 // GetStats returns "session-stats"
 func (ac *TransmissionClient) GetStats() (*Stats, error) {
 	cmd := &Command{
@@ -299,12 +317,12 @@ func (cmd *Command) SetDownloadDir(dir string) {
 	cmd.Arguments.DownloadDir = dir
 }
 
-func NewDelCmd(id int, removeFile bool) (*Command, error) {
+func newDelCmd(id int, removeFile bool) *Command {
 	cmd := &Command{}
 	cmd.Method = "torrent-remove"
 	cmd.Arguments.Ids = []int{id}
 	cmd.Arguments.DeleteData = removeFile
-	return cmd, nil
+	return cmd
 }
 
 func (ac *TransmissionClient) ExecuteCommand(cmd *Command) (*Command, error) {
