@@ -128,6 +128,15 @@ func (t *Torrent) TorrentStatus() string {
 // Torrents represent []Torrent
 type Torrents []*Torrent
 
+// GetIDs returns []int of all the ids
+func (t Torrents) GetIDs() []int {
+	ids := make([]int, 0, len(t))
+	for i := range t {
+		ids = append(ids, t[i].ID)
+	}
+	return ids
+}
+
 // sorting types
 type (
 	byID        Torrents
@@ -262,6 +271,60 @@ func (ac *TransmissionClient) StartTorrent(id int) (string, error) {
 //StopTorrent start the torrent
 func (ac *TransmissionClient) StopTorrent(id int) (string, error) {
 	return ac.sendSimpleCommand("torrent-stop", id)
+}
+
+// VerifyTorrent verifies a torrent
+func (ac *TransmissionClient) VerifyTorrent(id int) (string, error) {
+	return ac.sendSimpleCommand("torrent-verify", id)
+}
+
+// StartAll starts all the torrents
+func (ac *TransmissionClient) StartAll() error {
+	cmd := Command{Method: "torrent-start"}
+	torrents, err := ac.GetTorrents()
+	if err != nil {
+		return err
+	}
+
+	cmd.Arguments.Ids = torrents.GetIDs()
+	if _, err := ac.sendCommand(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// StopAll stops all torrents
+func (ac *TransmissionClient) StopAll() error {
+	cmd := Command{Method: "torrent-stop"}
+	torrents, err := ac.GetTorrents()
+	if err != nil {
+		return err
+	}
+
+	cmd.Arguments.Ids = torrents.GetIDs()
+	if _, err := ac.sendCommand(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// VerifyAll verfies all torrents
+func (ac *TransmissionClient) VerifyAll() error {
+	cmd := Command{Method: "torrent-verify"}
+
+	torrents, err := ac.GetTorrents()
+	if err != nil {
+		return err
+	}
+
+	cmd.Arguments.Ids = torrents.GetIDs()
+	if _, err := ac.sendCommand(cmd); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewGetTorrentsCmd() *Command {
