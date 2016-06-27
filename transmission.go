@@ -46,6 +46,7 @@ type arguments struct {
 	PausedTorrentCount int             `json:"pausedTorrentCount"`
 	TorrentCount       int             `json:"torrentCount"`
 	UploadSpeed        uint64          `json:"uploadSpeed"`
+	Version            string          `json:"version"`
 }
 
 type tracker struct {
@@ -417,6 +418,14 @@ func encodeFile(file string) (string, error) {
 	}
 
 	return base64.StdEncoding.EncodeToString(fileData), nil
+}
+
+// Version returns transmission's version
+func (ac *TransmissionClient) Version() string {
+	cmd := Command{Method: "session-get"}
+
+	resp, _ := ac.sendCommand(cmd)
+	return resp.Arguments.Version
 }
 
 func (ac *TransmissionClient) sendSimpleCommand(method string, id int) (result string, err error) {
