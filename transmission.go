@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"sort"
 )
@@ -124,6 +125,22 @@ func (t *Torrent) TorrentStatus() string {
 	default:
 		return "unknown"
 	}
+}
+
+// Ratio returns the upload ratio of the torrent
+func (t *Torrent) Ratio() string {
+	if t.UploadRatio < 0 {
+		return "∞"
+	}
+	return fmt.Sprintf("%.3f", t.UploadRatio)
+}
+
+// ETA returns the time left for the download to finish
+func (t *Torrent) ETA() string {
+	if t.Eta < 0 {
+		return "∞"
+	}
+	return fmt.Sprintf("%d", t.Eta)
 }
 
 // Torrents represent []Torrent
