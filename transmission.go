@@ -21,7 +21,7 @@ const (
 
 //TransmissionClient to talk to transmission
 type TransmissionClient struct {
-	apiclient ApiClient
+	apiclient *ApiClient
 }
 
 type Command struct {
@@ -207,10 +207,9 @@ type TorrentAdded struct {
 }
 
 //New create new transmission torrent
-func New(url string, username string, password string) TransmissionClient {
+func New(url string, username string, password string) *TransmissionClient {
 	apiclient := NewClient(url, username, password)
-	tc := TransmissionClient{apiclient: apiclient}
-	return tc
+	return &TransmissionClient{apiclient: apiclient}
 }
 
 //GetTorrents get a list of torrents

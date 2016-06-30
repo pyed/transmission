@@ -14,11 +14,8 @@ type ApiClient struct {
 	client   http.Client
 }
 
-func NewClient(url string,
-	username string, password string) ApiClient {
-	ac := ApiClient{url: url + "/transmission/rpc", username: username, password: password}
-
-	return ac
+func NewClient(url, username, password string) *ApiClient {
+	return &ApiClient{url: url, username: username, password: password}
 }
 
 func (ac *ApiClient) CreateClient(apiToken string) {
