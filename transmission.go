@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"sort"
 )
 
 const (
@@ -55,6 +54,13 @@ type tracker struct {
 	Id       int    `json:"id"`
 	Scrape   string `json:"scrape"`
 	Tire     int    `json:"tire"`
+}
+
+//TorrentAdded data returning
+type TorrentAdded struct {
+	HashString string `json:"hashString"`
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
 }
 
 // session-stats
@@ -155,55 +161,12 @@ func (t Torrents) GetIDs() []int {
 	return ids
 }
 
-// sorting types
-type (
-	byID        Torrents
-	byName      Torrents
-	byAddedDate Torrents
-)
+// sortType keeps track of which sorting we are using
+var sortType = SortID // SortID is transmission's default
 
-func (t byID) Len() int           { return len(t) }
-func (t byID) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byID) Less(i, j int) bool { return t[i].ID < t[j].ID }
-
-func (t byName) Len() int           { return len(t) }
-func (t byName) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byName) Less(i, j int) bool { return t[i].Name < t[j].Name }
-
-func (t byAddedDate) Len() int           { return len(t) }
-func (t byAddedDate) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byAddedDate) Less(i, j int) bool { return t[i].AddedDate < t[j].AddedDate }
-
-// methods of 'Torrents' to sort by ID, Name or AddedDate
-func (t Torrents) SortByID(reverse bool) {
-	if reverse {
-		sort.Sort(sort.Reverse(byID(t)))
-		return
-	}
-	sort.Sort(byID(t))
-}
-
-func (t Torrents) SortByName(reverse bool) {
-	if reverse {
-		sort.Sort(sort.Reverse(byName(t)))
-		return
-	}
-	sort.Sort(byName(t))
-}
-
-func (t Torrents) SortByAddedDate(reverse bool) {
-	if reverse {
-		sort.Sort(sort.Reverse(byAddedDate(t)))
-		return
-	}
-	sort.Sort(byAddedDate(t))
-}
-
-//TorrentAdded data returning
-type TorrentAdded struct {
-	HashString string `json:"hashString"`
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
+// SetSort takes a 'Sorting' to set 'sortType'
+func (ac *TransmissionClient) SetSort(st Sorting) {
+	sortType = st
 }
 
 //New create new transmission torrent
@@ -221,7 +184,45 @@ func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 		return nil, err
 	}
 
-	return out.Arguments.Torrents, nil
+	torrents := out.Arguments.Torrents
+
+	// sorting
+	switch sortType {
+	case SortID:
+		return torrents, nil // already sorted by ID
+	case SortRevID:
+		torrents.SortID(true)
+	case SortName:
+		torrents.SortName(false)
+	case SortRevName:
+		torrents.SortName(true)
+	case SortAge:
+		torrents.SortAge(false)
+	case SortRevAge:
+		torrents.SortAge(true)
+	case SortSize:
+		torrents.SortSize(false)
+	case SortRevSize:
+		torrents.SortSize(true)
+	case SortProgress:
+		torrents.SortProgress(false)
+	case SortRevProgress:
+		torrents.SortProgress(true)
+	case SortDownloaded:
+		torrents.SortDownloaded(false)
+	case SortRevDownloaded:
+		torrents.SortDownloaded(true)
+	case SortUploaded:
+		torrents.SortUploaded(false)
+	case SortRevUploaded:
+		torrents.SortUploaded(true)
+	case SortRatio:
+		torrents.SortRatio(false)
+	case SortRevRatio:
+		torrents.SortRatio(true)
+	}
+
+	return torrents, nil
 }
 
 // GetTorrent takes an id and returns *Torrent
