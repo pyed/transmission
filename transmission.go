@@ -1,6 +1,7 @@
 package transmission
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -147,6 +148,16 @@ func (t *Torrent) ETA() string {
 		return "∞"
 	}
 	return fmt.Sprintf("%d", t.Eta)
+}
+
+// GetTrackers combines the torrent's trackers in one string
+func (t *Torrent) GetTrackers() string {
+	buf := new(bytes.Buffer)
+	for i := range t.Trackers {
+		buf.WriteString(fmt.Sprintf("%s\n", t.Trackers[i].Announce))
+	}
+
+	return buf.String()
 }
 
 // Torrents represent []Torrent
