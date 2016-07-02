@@ -219,6 +219,14 @@ func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 		torrents.SortProgress(false)
 	case SortRevProgress:
 		torrents.SortProgress(true)
+	case SortDownSpeed:
+		torrents.SortDownSpeed(false)
+	case SortRevDownSpeed:
+		torrents.SortDownSpeed(true)
+	case SortUpSpeed:
+		torrents.SortUpSpeed(false)
+	case SortRevUpSpeed:
+		torrents.SortUpSpeed(true)
 	case SortDownloaded:
 		torrents.SortDownloaded(false)
 	case SortRevDownloaded:

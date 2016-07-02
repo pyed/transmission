@@ -15,6 +15,10 @@ const (
 	SortRevSize
 	SortProgress
 	SortRevProgress
+	SortDownSpeed
+	SortRevDownSpeed
+	SortUpSpeed
+	SortRevUpSpeed
 	SortDownloaded
 	SortRevDownloaded
 	SortUploaded
@@ -30,6 +34,8 @@ type (
 	byAge        Torrents
 	bySize       Torrents
 	byProgress   Torrents
+	byDownSpeed  Torrents
+	byUpSpeed    Torrents
 	byDownloaded Torrents
 	byUploaded   Torrents
 	byRatio      Torrents
@@ -54,6 +60,14 @@ func (t bySize) Less(i, j int) bool { return t[i].SizeWhenDone < t[j].SizeWhenDo
 func (t byProgress) Len() int           { return len(t) }
 func (t byProgress) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t byProgress) Less(i, j int) bool { return t[i].PercentDone < t[j].PercentDone }
+
+func (t byDownSpeed) Len() int           { return len(t) }
+func (t byDownSpeed) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+func (t byDownSpeed) Less(i, j int) bool { return t[i].RateDownload < t[j].RateDownload }
+
+func (t byUpSpeed) Len() int           { return len(t) }
+func (t byUpSpeed) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+func (t byUpSpeed) Less(i, j int) bool { return t[i].RateUpload < t[j].RateUpload }
 
 func (t byDownloaded) Len() int           { return len(t) }
 func (t byDownloaded) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
@@ -105,6 +119,22 @@ func (t Torrents) SortProgress(reverse bool) {
 		return
 	}
 	sort.Sort(byProgress(t))
+}
+
+func (t Torrents) SortDownSpeed(reverse bool) {
+	if reverse {
+		sort.Sort(sort.Reverse(byDownSpeed(t)))
+		return
+	}
+	sort.Sort(byDownSpeed(t))
+}
+
+func (t Torrents) SortUpSpeed(reverse bool) {
+	if reverse {
+		sort.Sort(sort.Reverse(byUpSpeed(t)))
+		return
+	}
+	sort.Sort(byUpSpeed(t))
 }
 
 func (t Torrents) SortDownloaded(reverse bool) {
