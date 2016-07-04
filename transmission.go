@@ -104,6 +104,8 @@ type Torrent struct {
 	DownloadDir    string    `json:"downloadDir"`
 	DownloadedEver uint64    `json:"downloadedEver"`
 	UploadedEver   uint64    `json:"uploadedEver"`
+	HaveUnchecked  uint64    `json:"haveUnchecked"`
+	HaveValid      uint64    `json:"haveValid"`
 	IsFinished     bool      `json:"isFinished"`
 	PercentDone    float64   `json:"percentDone"`
 	SeedRatioMode  int       `json:"seedRatioMode"`
@@ -158,6 +160,11 @@ func (t *Torrent) GetTrackers() string {
 	}
 
 	return buf.String()
+}
+
+// Have returns haveValid + haveUnchecked
+func (t *Torrent) Have() uint64 {
+	return t.HaveValid + t.HaveUnchecked
 }
 
 // Torrents represent []Torrent
@@ -370,7 +377,7 @@ func NewGetTorrentsCmd() *Command {
 	cmd.Method = "torrent-get"
 	cmd.Arguments.Fields = []string{"id", "name",
 		"status", "addedDate", "leftUntilDone", "sizeWhenDone", "eta", "uploadRatio", "uploadedEver",
-		"rateDownload", "rateUpload", "downloadDir", "isFinished", "downloadedEver",
+		"rateDownload", "rateUpload", "downloadDir", "haveValid", "haveUnchecked", "isFinished", "downloadedEver",
 		"percentDone", "seedRatioMode", "error", "errorString", "trackers"}
 
 	return cmd
