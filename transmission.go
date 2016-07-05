@@ -188,9 +188,19 @@ func (ac *TransmissionClient) SetSort(st Sorting) {
 }
 
 //New create new transmission torrent
-func New(url string, username string, password string) *TransmissionClient {
+func New(url string, username string, password string) (*TransmissionClient, error) {
 	apiclient := NewClient(url, username, password)
-	return &TransmissionClient{apiclient: apiclient}
+	client := &TransmissionClient{apiclient: apiclient}
+
+	// test that we have a working client
+	cmd := Command{Method: "session-get"}
+	_, err := client.sendCommand(cmd)
+	if err != nil {
+		return client, err
+	}
+
+	return client, nil
+
 }
 
 //GetTorrents get a list of torrents
@@ -479,11 +489,12 @@ func (ac *TransmissionClient) sendSimpleCommand(method string, id int) (result s
 }
 
 func (ac *TransmissionClient) sendCommand(cmd Command) (response Command, err error) {
-	body, err := json.Marshal(cmd)
+	var body, output []byte
+	body, err = json.Marshal(cmd)
 	if err != nil {
 		return
 	}
-	output, err := ac.apiclient.Post(string(body))
+	output, err = ac.apiclient.Post(string(body))
 	if err != nil {
 		return
 	}
