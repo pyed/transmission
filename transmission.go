@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"time"
 )
 
 const (
@@ -75,43 +76,51 @@ type Stats struct {
 	UploadSpeed        uint64
 }
 type cumulativeStats struct {
-	DownloadedBytes uint64 `json:"downloadedBytes"`
-	FilesAdded      int    `json:"filesAdded"`
-	SecondsActive   int    `json:"secondsActive"`
-	SessionCount    int    `json:"sessionCount"`
-	UploadedBytes   uint64 `json:"uploadedBytes"`
+	DownloadedBytes uint64        `json:"downloadedBytes"`
+	FilesAdded      int           `json:"filesAdded"`
+	SecondsActive   time.Duration `json:"secondsActive"`
+	SessionCount    int           `json:"sessionCount"`
+	UploadedBytes   uint64        `json:"uploadedBytes"`
 }
 type currentStats struct {
-	DownloadedBytes uint64 `json:"downloadedBytes"`
-	FilesAdded      int    `json:"filesAdded"`
-	SecondsActive   int    `json:"secondsActive"`
-	SessionCount    int    `json:"sessionCount"`
-	UploadedBytes   uint64 `json:"uploadedBytes"`
+	DownloadedBytes uint64        `json:"downloadedBytes"`
+	FilesAdded      int           `json:"filesAdded"`
+	SecondsActive   time.Duration `json:"secondsActive"`
+	SessionCount    int           `json:"sessionCount"`
+	UploadedBytes   uint64        `json:"uploadedBytes"`
+}
+
+func (s *Stats) CurrentActiveTime() string {
+	return (time.Second * s.CurrentStats.SecondsActive).String()
+}
+
+func (s *Stats) CumulativeActiveTime() string {
+	return (time.Second * s.CumulativeStats.SecondsActive).String()
 }
 
 //Torrent struct for torrents
 type Torrent struct {
-	ID             int       `json:"id"`
-	Name           string    `json:"name"`
-	Status         int       `json:"status"`
-	AddedDate      int64     `json:"addedDate"`
-	LeftUntilDone  uint64    `json:"leftUntilDone"`
-	SizeWhenDone   uint64    `json:"sizeWhenDone"`
-	Eta            int       `json:"eta"`
-	UploadRatio    float64   `json:"uploadRatio"`
-	RateDownload   uint64    `json:"rateDownload"`
-	RateUpload     uint64    `json:"rateUpload"`
-	DownloadDir    string    `json:"downloadDir"`
-	DownloadedEver uint64    `json:"downloadedEver"`
-	UploadedEver   uint64    `json:"uploadedEver"`
-	HaveUnchecked  uint64    `json:"haveUnchecked"`
-	HaveValid      uint64    `json:"haveValid"`
-	IsFinished     bool      `json:"isFinished"`
-	PercentDone    float64   `json:"percentDone"`
-	SeedRatioMode  int       `json:"seedRatioMode"`
-	Trackers       []tracker `json:"trackers"`
-	Error          int       `json:"error"`
-	ErrorString    string    `json:"errorString"`
+	ID             int           `json:"id"`
+	Name           string        `json:"name"`
+	Status         int           `json:"status"`
+	AddedDate      int64         `json:"addedDate"`
+	LeftUntilDone  uint64        `json:"leftUntilDone"`
+	SizeWhenDone   uint64        `json:"sizeWhenDone"`
+	Eta            time.Duration `json:"eta"`
+	UploadRatio    float64       `json:"uploadRatio"`
+	RateDownload   uint64        `json:"rateDownload"`
+	RateUpload     uint64        `json:"rateUpload"`
+	DownloadDir    string        `json:"downloadDir"`
+	DownloadedEver uint64        `json:"downloadedEver"`
+	UploadedEver   uint64        `json:"uploadedEver"`
+	HaveUnchecked  uint64        `json:"haveUnchecked"`
+	HaveValid      uint64        `json:"haveValid"`
+	IsFinished     bool          `json:"isFinished"`
+	PercentDone    float64       `json:"percentDone"`
+	SeedRatioMode  int           `json:"seedRatioMode"`
+	Trackers       []tracker     `json:"trackers"`
+	Error          int           `json:"error"`
+	ErrorString    string        `json:"errorString"`
 }
 
 // Status translates the status of the torrent
@@ -149,7 +158,7 @@ func (t *Torrent) ETA() string {
 	if t.Eta < 0 {
 		return "∞"
 	}
-	return fmt.Sprintf("%d", t.Eta)
+	return (time.Second * t.Eta).String()
 }
 
 // GetTrackers combines the torrent's trackers in one string
