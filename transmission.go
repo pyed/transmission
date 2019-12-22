@@ -113,6 +113,7 @@ type Torrent struct {
 	DownloadDir    string        `json:"downloadDir"`
 	DownloadedEver uint64        `json:"downloadedEver"`
 	UploadedEver   uint64        `json:"uploadedEver"`
+	HashString     string        `json:"hashString"`
 	HaveUnchecked  uint64        `json:"haveUnchecked"`
 	HaveValid      uint64        `json:"haveValid"`
 	IsFinished     bool          `json:"isFinished"`
@@ -396,7 +397,7 @@ func NewGetTorrentsCmd() *Command {
 	cmd.Method = "torrent-get"
 	cmd.Arguments.Fields = []string{"id", "name",
 		"status", "addedDate", "leftUntilDone", "sizeWhenDone", "eta", "uploadRatio", "uploadedEver",
-		"rateDownload", "rateUpload", "downloadDir", "haveValid", "haveUnchecked", "isFinished", "downloadedEver",
+		"rateDownload", "rateUpload", "downloadDir", "hashString", "haveValid", "haveUnchecked", "isFinished", "downloadedEver",
 		"percentDone", "seedRatioMode", "error", "errorString", "trackers"}
 
 	return cmd
