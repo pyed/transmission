@@ -20,7 +20,7 @@ const (
 	StatusSeeding
 )
 
-//TransmissionClient to talk to transmission
+// TransmissionClient to talk to transmission
 type TransmissionClient struct {
 	apiclient *ApiClient
 }
@@ -32,14 +32,16 @@ type Command struct {
 }
 
 type arguments struct {
-	Fields       []string     `json:"fields,omitempty"`
-	Torrents     Torrents     `json:"torrents,omitempty"`
-	Ids          []int        `json:"ids,omitempty"`
-	DeleteData   bool         `json:"delete-local-data,omitempty"`
-	DownloadDir  string       `json:"download-dir,omitempty"`
-	MetaInfo     string       `json:"metainfo,omitempty"`
-	Filename     string       `json:"filename,omitempty"`
-	TorrentAdded TorrentAdded `json:"torrent-added"`
+	Fields         []string     `json:"fields,omitempty"`
+	Torrents       Torrents     `json:"torrents,omitempty"`
+	Ids            []int        `json:"ids,omitempty"`
+	DeleteData     bool         `json:"delete-local-data,omitempty"`
+	DownloadDir    string       `json:"download-dir,omitempty"`
+	MetaInfo       string       `json:"metainfo,omitempty"`
+	Filename       string       `json:"filename,omitempty"`
+	TorrentAdded   TorrentAdded `json:"torrent-added"`
+	SpeedLimitDown uint         `json:"speed-limit-down,omitempty"`
+	SpeedLimitUp   uint         `json:"speed-limit-up,omitempty"`
 	// Stats
 	ActiveTorrentCount int             `json:"activeTorrentCount"`
 	CumulativeStats    cumulativeStats `json:"cumulative-stats"`
@@ -58,7 +60,7 @@ type tracker struct {
 	Tire     int    `json:"tire"`
 }
 
-//TorrentAdded data returning
+// TorrentAdded data returning
 type TorrentAdded struct {
 	HashString string `json:"hashString"`
 	ID         int    `json:"id"`
@@ -98,7 +100,7 @@ func (s *Stats) CumulativeActiveTime() string {
 	return (time.Second * s.CumulativeStats.SecondsActive).String()
 }
 
-//Torrent struct for torrents
+// Torrent struct for torrents
 type Torrent struct {
 	ID             int           `json:"id"`
 	Name           string        `json:"name"`
@@ -197,7 +199,7 @@ func (ac *TransmissionClient) SetSort(st Sorting) {
 	sortType = st
 }
 
-//New create new transmission torrent
+// New create new transmission torrent
 func New(url string, username string, password string) (*TransmissionClient, error) {
 	apiclient := NewClient(url, username, password)
 	client := &TransmissionClient{apiclient: apiclient}
@@ -213,7 +215,7 @@ func New(url string, username string, password string) (*TransmissionClient, err
 
 }
 
-//GetTorrents get a list of torrents
+// GetTorrents get a list of torrents
 func (ac *TransmissionClient) GetTorrents() (Torrents, error) {
 	cmd := NewGetTorrentsCmd()
 
@@ -327,12 +329,12 @@ func (ac *TransmissionClient) GetStats() (*Stats, error) {
 	}, nil
 }
 
-//StartTorrent start the torrent
+// StartTorrent start the torrent
 func (ac *TransmissionClient) StartTorrent(id int) (string, error) {
 	return ac.sendSimpleCommand("torrent-start", id)
 }
 
-//StopTorrent start the torrent
+// StopTorrent start the torrent
 func (ac *TransmissionClient) StopTorrent(id int) (string, error) {
 	return ac.sendSimpleCommand("torrent-stop", id)
 }
