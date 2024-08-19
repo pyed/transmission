@@ -437,8 +437,38 @@ func NewAddCmdByFile(file string) (*Command, error) {
 	return cmd, nil
 }
 
+func NewSessionSetCommand() *Command {
+	cmd := &Command{}
+	cmd.Method = "session-set"
+	return cmd
+}
+
 func (cmd *Command) SetDownloadDir(dir string) {
 	cmd.Arguments.DownloadDir = dir
+}
+
+type SpeedLimitType string
+
+const (
+	DownloadLimitType = "downloadlimit"
+	UploadLimitType   = "uploadlimit"
+)
+
+// newSpeedLimitCommand creates a new command that mutates either a download or upload limit.
+func NewSpeedLimitCommand(limitType SpeedLimitType, limit uint) *Command {
+	cmd := &Command{}
+	cmd.Method = "session-set"
+
+	switch limitType {
+	case DownloadLimitType:
+		cmd.Arguments.SpeedLimitDown = limit
+	case UploadLimitType:
+		cmd.Arguments.SpeedLimitUp = limit
+	default:
+		return nil
+	}
+
+	return cmd
 }
 
 func newDelCmd(id int, removeFile bool) *Command {
