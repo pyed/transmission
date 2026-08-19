@@ -1,7 +1,11 @@
 package transmission
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
+// Sorting represents the sort criteria.
 type Sorting int
 
 const (
@@ -27,136 +31,144 @@ const (
 	SortRevRatio
 )
 
-// sorting types
-type (
-	byID         Torrents
-	byName       Torrents
-	byAge        Torrents
-	bySize       Torrents
-	byProgress   Torrents
-	byDownSpeed  Torrents
-	byUpSpeed    Torrents
-	byDownloaded Torrents
-	byUploaded   Torrents
-	byRatio      Torrents
-)
+// SetSort sets the default sorting for GetTorrents calls on the client.
+func (c *Client) SetSort(st Sorting) {
+	c.sortMu.Lock()
+	defer c.sortMu.Unlock()
+	c.sort = st
+}
 
-func (t byID) Len() int           { return len(t) }
-func (t byID) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byID) Less(i, j int) bool { return t[i].ID < t[j].ID }
+func (c *Client) applySort(torrents Torrents, st Sorting) {
+	switch st {
+	case SortID:
+		torrents.SortID(false)
+	case SortRevID:
+		torrents.SortID(true)
+	case SortName:
+		torrents.SortName(false)
+	case SortRevName:
+		torrents.SortName(true)
+	case SortAge:
+		torrents.SortAge(false)
+	case SortRevAge:
+		torrents.SortAge(true)
+	case SortSize:
+		torrents.SortSize(false)
+	case SortRevSize:
+		torrents.SortSize(true)
+	case SortProgress:
+		torrents.SortProgress(false)
+	case SortRevProgress:
+		torrents.SortProgress(true)
+	case SortDownSpeed:
+		torrents.SortDownSpeed(false)
+	case SortRevDownSpeed:
+		torrents.SortDownSpeed(true)
+	case SortUpSpeed:
+		torrents.SortUpSpeed(false)
+	case SortRevUpSpeed:
+		torrents.SortUpSpeed(true)
+	case SortDownloaded:
+		torrents.SortDownloaded(false)
+	case SortRevDownloaded:
+		torrents.SortDownloaded(true)
+	case SortUploaded:
+		torrents.SortUploaded(false)
+	case SortRevUploaded:
+		torrents.SortUploaded(true)
+	case SortRatio:
+		torrents.SortRatio(false)
+	case SortRevRatio:
+		torrents.SortRatio(true)
+	}
+}
 
-func (t byName) Len() int           { return len(t) }
-func (t byName) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byName) Less(i, j int) bool { return t[i].Name < t[j].Name }
-
-func (t byAge) Len() int           { return len(t) }
-func (t byAge) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byAge) Less(i, j int) bool { return t[i].AddedDate < t[j].AddedDate }
-
-func (t bySize) Len() int           { return len(t) }
-func (t bySize) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t bySize) Less(i, j int) bool { return t[i].SizeWhenDone < t[j].SizeWhenDone }
-
-func (t byProgress) Len() int           { return len(t) }
-func (t byProgress) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byProgress) Less(i, j int) bool { return t[i].PercentDone < t[j].PercentDone }
-
-func (t byDownSpeed) Len() int           { return len(t) }
-func (t byDownSpeed) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byDownSpeed) Less(i, j int) bool { return t[i].RateDownload < t[j].RateDownload }
-
-func (t byUpSpeed) Len() int           { return len(t) }
-func (t byUpSpeed) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byUpSpeed) Less(i, j int) bool { return t[i].RateUpload < t[j].RateUpload }
-
-func (t byDownloaded) Len() int           { return len(t) }
-func (t byDownloaded) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byDownloaded) Less(i, j int) bool { return t[i].DownloadedEver < t[j].DownloadedEver }
-
-func (t byUploaded) Len() int           { return len(t) }
-func (t byUploaded) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byUploaded) Less(i, j int) bool { return t[i].UploadedEver < t[j].UploadedEver }
-
-func (t byRatio) Len() int           { return len(t) }
-func (t byRatio) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t byRatio) Less(i, j int) bool { return t[i].UploadRatio < t[j].UploadRatio }
-
+// SortID sorts torrents by ID.
 func (t Torrents) SortID(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byID(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].ID > t[j].ID })
 		return
 	}
-	sort.Sort(byID(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].ID < t[j].ID })
 }
 
+// SortName sorts torrents alphabetically by name (case-insensitive).
 func (t Torrents) SortName(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byName(t)))
+		sort.Slice(t, func(i, j int) bool { return strings.ToLower(t[i].Name) > strings.ToLower(t[j].Name) })
 		return
 	}
-	sort.Sort(byName(t))
+	sort.Slice(t, func(i, j int) bool { return strings.ToLower(t[i].Name) < strings.ToLower(t[j].Name) })
 }
 
+// SortAge sorts torrents by added date.
 func (t Torrents) SortAge(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byAge(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].AddedDate > t[j].AddedDate })
 		return
 	}
-	sort.Sort(byAge(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].AddedDate < t[j].AddedDate })
 }
 
+// SortSize sorts torrents by size when done.
 func (t Torrents) SortSize(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(bySize(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].SizeWhenDone > t[j].SizeWhenDone })
 		return
 	}
-	sort.Sort(bySize(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].SizeWhenDone < t[j].SizeWhenDone })
 }
 
+// SortProgress sorts torrents by percent done.
 func (t Torrents) SortProgress(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byProgress(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].PercentDone > t[j].PercentDone })
 		return
 	}
-	sort.Sort(byProgress(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].PercentDone < t[j].PercentDone })
 }
 
+// SortDownSpeed sorts torrents by download speed.
 func (t Torrents) SortDownSpeed(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byDownSpeed(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].RateDownload > t[j].RateDownload })
 		return
 	}
-	sort.Sort(byDownSpeed(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].RateDownload < t[j].RateDownload })
 }
 
+// SortUpSpeed sorts torrents by upload speed.
 func (t Torrents) SortUpSpeed(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byUpSpeed(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].RateUpload > t[j].RateUpload })
 		return
 	}
-	sort.Sort(byUpSpeed(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].RateUpload < t[j].RateUpload })
 }
 
+// SortDownloaded sorts torrents by total downloaded bytes ever.
 func (t Torrents) SortDownloaded(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byDownloaded(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].DownloadedEver > t[j].DownloadedEver })
 		return
 	}
-	sort.Sort(byDownloaded(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].DownloadedEver < t[j].DownloadedEver })
 }
 
+// SortUploaded sorts torrents by total uploaded bytes ever.
 func (t Torrents) SortUploaded(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byUploaded(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].UploadedEver > t[j].UploadedEver })
 		return
 	}
-	sort.Sort(byUploaded(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].UploadedEver < t[j].UploadedEver })
 }
 
+// SortRatio sorts torrents by upload ratio.
 func (t Torrents) SortRatio(reverse bool) {
 	if reverse {
-		sort.Sort(sort.Reverse(byRatio(t)))
+		sort.Slice(t, func(i, j int) bool { return t[i].UploadRatio > t[j].UploadRatio })
 		return
 	}
-	sort.Sort(byRatio(t))
+	sort.Slice(t, func(i, j int) bool { return t[i].UploadRatio < t[j].UploadRatio })
 }
